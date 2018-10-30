@@ -21,17 +21,24 @@ protected:
 
 private:
 
+    QPushButton *smallButton;
+    QPushButton *mediumButton;
+    QPushButton *bigButton;
     QGridLayout *grid;
+    QHBoxLayout *upRow;
+    QVBoxLayout *main;
     GameModel _model;
     QVector <GameButton*> buttons;
-
-    void newGame();
 
 private slots:
 
     void _modelFieldChanged(Coordinate previous, Coordinate current, GameModel::FieldType type);
     void _modelGameWon();
     void _modelGameOver();
+    void newGame();
+    void small();
+    void medium();
+    void big();
 };
 
 #endif // GAMEVIEW_H

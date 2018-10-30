@@ -1,6 +1,7 @@
 #ifndef GAMEMODEL_H
 #define GAMEMODEL_H
 #include "coordinate.h"
+#include "newgamedialog.h"
 #include <QWidget>
 #include <QTimer>
 
@@ -17,6 +18,11 @@ public:
     FieldType getField(int x, int y);
     Coordinate player;
     Coordinate previous;
+
+    int size;
+    int baskets;
+    int guards;
+    int obstacles;
 
     void newGame();
     void stepPlayer(int x, int y);
@@ -45,18 +51,19 @@ private:
     void horizontalGuard(int index);
     void isGameOver();
 
-    int baskets;
-    int guards;
-    int obstacles;
-    int step;  /// léptetéshez kell
+    int fstep;  /// léptetéshez kell
+    int sstep;
+    int tstep;
+    int fostep;
+    int step;
     int basketsHave; /// ahányat felszedtünk
 
     QVector <Coordinate> _baskets;
     QVector <Coordinate> _guards;
+    QVector <int> steps;
     Coordinate stepTemp;
 
     QTimer *guardstep;
-
 
 };
 

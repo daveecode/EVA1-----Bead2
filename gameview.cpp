@@ -8,17 +8,62 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
 {
 
     setWindowTitle("Maci Laci");
-    setStyleSheet("background-image: url(:image/free.jpg)");
 
     grid = new QGridLayout;
+    upRow = new QHBoxLayout;
+    main = new QVBoxLayout;
+    smallButton = new QPushButton(this);
+    mediumButton = new QPushButton(this);
+    bigButton = new QPushButton(this);
+
+    upRow->addWidget(smallButton);
+    upRow->addWidget(mediumButton);
+    upRow->addWidget(bigButton);
+
+
 
     newGame();
 
-    setLayout(grid);
+    //setLayout(grid);
 
+    main->addLayout(upRow);
+    main->addLayout(grid);
+    setLayout(main);
+
+    connect(smallButton, SIGNAL(clicked(bool)), this, SLOT(small())); ///legfelsőőőőőő
     connect(&_model, SIGNAL(gameWon()), this, SLOT(_modelGameWon()));
     connect(&_model, SIGNAL(gameOver()), this, SLOT(_modelGameOver()));
     connect(&_model, SIGNAL(fieldChanged(Coordinate,Coordinate,GameModel::FieldType)), this, SLOT(_modelFieldChanged(Coordinate,Coordinate,GameModel::FieldType)));
+}
+
+void GameView::small()
+{
+    _model.size = 8;
+    _model.guards = 1;
+    _model.obstacles = 6;
+    _model.baskets = 6;
+
+    newGame();
+}
+
+void GameView::medium()
+{
+    _model.size = 9;
+    _model.guards = 2;
+    _model.obstacles = 8;
+    _model.baskets = 8;
+
+    newGame();
+}
+
+void GameView::big()
+{
+    _model.size = 10;
+    _model.guards = 3;
+    _model.baskets = 10;
+    _model.obstacles = 10;
+
+    newGame();
 }
 
 void GameView::newGame()
@@ -33,9 +78,9 @@ void GameView::newGame()
     buttons.clear();
     _model.newGame();
 
-    for(int i = 0; i < 10; ++i) {
+    for(int i = 0; i < _model.size; ++i) {
 
-        for(int j = 0; j < 10; ++j) {
+        for(int j = 0; j < _model.size; ++j) {
 
             GameButton *button = new GameButton(Coordinate(i,j,0), this);
             grid->addWidget(button, i, j);

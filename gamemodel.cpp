@@ -8,40 +8,53 @@ GameModel::GameModel()
 
         gameTable[i] = new FieldType[10];
     }
+
+    size = 10;
+    guards = 2;
+    baskets = 6;
+    obstacles = 8;
+
+    guardstep = new QTimer;
+    connect(guardstep, SIGNAL(timeout()), this, SLOT(stepGuard()));
 }
 
 void GameModel::newGame()
 {
-    for(int i = 0; i < 10; ++i) {
 
-        for(int j = 0; j < 10; ++j) {
+    gameTable = new FieldType*[size];
+
+    for(int i = 0; i < size; ++i) {
+
+        gameTable[i] = new FieldType[size];
+    }
+    for(int i = 0; i < size; ++i) {
+
+        for(int j = 0; j < size; ++j) {
 
             gameTable[i][j] = Free; // mindegyik mező legyen szabad
         }
     }
 
+    if(guardstep->isActive()) {
+        guardstep->stop();
+    }
+
     _guards.clear();
     _baskets.clear();
+    steps.clear();
 
     basketsHave = 0;
-    guards = 1;
-    baskets = 6;
-    obstacles = 8;
 
     gameTable[0][0] = Bear;
     player.x = 0;
     player.y = 0;
     previous = player;
+    stepTemp.x = -10;
+    stepTemp.y = -10;
 
     setElements();
 
-    stepTemp.x = -1;
-    stepTemp.y = -1;
-
-    guardstep = new QTimer;
     guardstep->start(1000);
-
-    connect(guardstep, SIGNAL(timeout()), this, SLOT(stepGuard()));
 }
 
 void GameModel::setElements()
@@ -53,35 +66,34 @@ void GameModel::setElements()
 
 void GameModel::setGuards()
 {
-    int x = qrand() % 10;
-    int y = qrand() % 10;
-
-    step = -1;
+    int x = qrand() % size;
+    int y = qrand() % size;
 
     while(guards > 0) {
 
         if(gameTable[x][y] == Free) {
 
             gameTable[x][y] = Guard;
-            Coordinate grd(x,y, 8 - guards);
+            Coordinate grd(x,y, 0);
             _guards.append(grd);
-            x = qrand() % 10;
-            y = qrand() % 10;
+            steps.append(-1);
+            x = qrand() % size;
+            y = qrand() % size;
             guards--;
         }
 
         else {
 
-            x = qrand() % 10;
-            y = qrand() % 10;
+            x = qrand() % size;
+            y = qrand() % size;
         }
     }
 }
 
 void GameModel::setBaskets()
 {
-    int x = qrand() % 10;
-    int y = qrand() % 10;
+    int x = qrand() % size;
+    int y = qrand() % size;
 
     while(baskets > 0) {
 
@@ -90,38 +102,38 @@ void GameModel::setBaskets()
             gameTable[x][y] = Basket;
             Coordinate bsk(x,y, 0);
             _baskets.append(bsk);
-            x = qrand() % 10;
-            y = qrand() % 10;
+            x = qrand() % size;
+            y = qrand() % size;
             baskets--;
         }
 
         else {
 
-            x = qrand() % 10;
-            y = qrand() % 10;
+            x = qrand() % size;
+            y = qrand() % size;
         }
     }
 }
 
 void GameModel::setObstacles()
 {
-    int x = qrand() % 9 + 1;
-    int y = qrand() % 10;
+    int x = qrand() % size;
+    int y = qrand() % size;
 
     while(obstacles > 0) {
 
         if(gameTable[x][y] == Free) {
 
             gameTable[x][y] = Obstacle;
-            x = qrand() % 9 + 1;
-            y = qrand() % 10;
+            x = qrand() % size;
+            y = qrand() % size;
             obstacles--;
         }
 
         else {
 
-            x = qrand() % 9 + 1;
-            y = qrand() % 10;
+            x = qrand() % size;
+            y = qrand() % size;
         }
     }
 }
@@ -159,7 +171,7 @@ void GameModel::stepPlayer(int x, int y)
     player.x += x;
     player.y += y;
 
-    if(player.x > 9 || player.x < 0 || player.y > 9 || player.y < 0 || gameTable[player.x][player.y] == Obstacle) {
+    if(player.x > size - 1 || player.x < 0 || player.y > size - 1 || player.y < 0 || gameTable[player.x][player.y] == Obstacle) {
 
         player = previous;
     }
@@ -211,73 +223,91 @@ void GameModel::isGameOver()
 
 void GameModel::verticalGuard(int index)
 {
-        Coordinate _new(_guards[index].x + step, _guards[index].y, 0);
+    if(getField(_guards[index].x + steps[index], _guards[index].y) == Obstacle) {
+
+        steps[index] = steps[index] * -1;
+        _guards[index].type = Coordinate::Horizontal;
+        return;
+    }
+
+    Coordinate _new(_guards[index].x + steps[index], _guards[index].y, 0);
+    fieldChanged(_guards[index], _new, GameModel::Guard);
+    _guards[index].x += steps[index];
+    isGameOver();
+
+    if(_guards[index].x == -1 || _guards[index].x == size) {
+
+        steps[index] = steps[index] * -1;
+        _guards[index].x += steps[index];
+        Coordinate _new(_guards[index].x + steps[index], _guards[index].y, 0);
         fieldChanged(_guards[index], _new, GameModel::Guard);
-        _guards[index].x += step;
-        isGameOver();
+        _guards[index].x += steps[index];
+    }
 
-        if(_guards[index].x == -1 || _guards[index].x == 10) {
 
-            step = step * -1;
-            _guards[index].x += step;
-            Coordinate _new(_guards[index].x + step, _guards[index].y, 0);
-            fieldChanged(_guards[index], _new, GameModel::Guard);
-            _guards[index].x += step;
-        }
 
-        if(getField(_guards[index].x + step, _guards[index].y) == Obstacle) {
+    if(getField(_guards[index].x + steps[index], _guards[index].y) == Basket) {
 
-            step = step * -1;
-            _guards[index].type = Coordinate::Horizontal;
-            return;
-        }
+        stepTemp.x = _guards[index].x + steps[index];
+        stepTemp.y = _guards[index].y;
+    }
 
-        if(getField(_guards[index].x + step, _guards[index].y) == Basket) {
+    if(stepTemp.x == _guards[index].x - steps[index] && _baskets.contains(stepTemp)) {
 
-            stepTemp.x = _guards[index].x + step;
-            stepTemp.y = _guards[index].y;
-        }
-
-        if(stepTemp.x == _guards[index].x - step && _baskets.contains(stepTemp)) {
-
-            fieldChanged(stepTemp, stepTemp, GameModel::Basket);
-        }
+        fieldChanged(stepTemp, stepTemp, GameModel::Basket);
+    }
 }
 
 void GameModel::horizontalGuard(int index)
 {
-        isGameOver();
-        Coordinate _new(_guards[index].x, _guards[index].y + step, 0);
-        fieldChanged(_guards[index], _new, GameModel::Guard);
-        _guards[index].y += step;
 
-        if(_guards[index].y == -1 || _guards[index].y == 10) {
+    if(getField(_guards[index].x, _guards[index].y + steps[index]) == Obstacle) {
 
-                step = step * -1;
-                _guards[index].y += step;
-                Coordinate _new(_guards[index].x, _guards[index].y + step, 0);
-                fieldChanged(_guards[index], _new, GameModel::Guard);
-                _guards[index].y += step;
-        }
+        steps[index] = steps[index] * -1;
+        _guards[index].type = Coordinate::Vertical;
+        return;
+    }
 
-        if(getField(_guards[index].x, _guards[index].y + step) == Obstacle) {
+    if(getField(_guards[index].x, _guards[index].y + steps[index]) == Basket) {
 
-            step = step * -1;
-            _guards[index].type = Coordinate::Vertical;
-            return;
-        }
+        stepTemp.x = _guards[index].x;
+        stepTemp.y = _guards[index].y + steps[index];
+    }
 
-        if(getField(_guards[index].x, _guards[index].y + step) == Basket) {
+    if(stepTemp.y == _guards[index].y - steps[index] && _baskets.contains(stepTemp)) {
 
-            stepTemp.x = _guards[index].x;
-            stepTemp.y = _guards[index].y + step;
-        }
+        fieldChanged(stepTemp, stepTemp, GameModel::Basket);
 
-        if(stepTemp.y == _guards[index].y - step && _baskets.contains(stepTemp)) {
+    }
+
+    isGameOver();
+    Coordinate _new(_guards[index].x, _guards[index].y + steps[index], 0);
+    fieldChanged(_guards[index], _new, GameModel::Guard);
+    _guards[index].y += steps[index];  /// ez van rossz helyen, le kell vizgsálni a _new után az obstaclet!!!
+
+    if(_guards[index].y == -1 || _guards[index].y == size) {
+
+
+        if(stepTemp.y == _guards[index].y - steps[index] && _baskets.contains(stepTemp)) {
 
             fieldChanged(stepTemp, stepTemp, GameModel::Basket);
-
+            steps[index] = steps[index] * -1;
+            _guards[index].y += steps[index];
+            Coordinate _new(_guards[index].x, _guards[index].y + steps[index], 0);
+            fieldChanged(_guards[index], _new, GameModel::Guard);
+            _guards[index].y += steps[index];
         }
+
+        else {
+            steps[index] = steps[index] * -1;
+            _guards[index].y += steps[index];
+            Coordinate _new(_guards[index].x, _guards[index].y + steps[index], 0);
+            fieldChanged(_guards[index], _new, GameModel::Guard);
+            _guards[index].y += steps[index];
+        }
+    }
+
+
 }
 
 void GameModel::stepGuard()
@@ -297,7 +327,7 @@ void GameModel::stepGuard()
 
 GameModel::FieldType GameModel::getField(int x, int y)
 {
-    if( x < 0 || x > 9 || y < 0 || y > 9) return None;
+    if( x < 0 || x >= size || y < 0 || y >= size) return None;
 
     return gameTable[x][y];
 }
