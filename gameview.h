@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QLayout>
+#include <QLabel>
 
 #include "gamemodel.h"
 #include "gamebutton.h"
@@ -24,6 +25,8 @@ private:
     QPushButton *smallButton;
     QPushButton *mediumButton;
     QPushButton *bigButton;
+    QLabel *bsk;
+    QLabel *time;
     QGridLayout *grid;
     QHBoxLayout *upRow;
     QVBoxLayout *main;
@@ -35,6 +38,7 @@ private slots:
     void _modelFieldChanged(Coordinate previous, Coordinate current, GameModel::FieldType type);
     void _modelGameWon();
     void _modelGameOver();
+    void _modelUpdateTime();
     void newGame();
     void small();
     void medium();

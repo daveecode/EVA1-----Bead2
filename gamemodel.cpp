@@ -15,7 +15,10 @@ GameModel::GameModel()
     obstacles = 8;
 
     guardstep = new QTimer;
+
+
     connect(guardstep, SIGNAL(timeout()), this, SLOT(stepGuard()));
+    //connect(gameTime, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void GameModel::newGame()
@@ -44,6 +47,7 @@ void GameModel::newGame()
     steps.clear();
 
     basketsHave = 0;
+    _time = QTime(0,0,0);
 
     gameTable[0][0] = Bear;
     player.x = 0;
@@ -54,7 +58,7 @@ void GameModel::newGame()
 
     setElements();
 
-    guardstep->start(500);
+    guardstep->start(1000);
 }
 
 void GameModel::setElements()
@@ -66,7 +70,7 @@ void GameModel::setElements()
 
 void GameModel::setGuards()
 {
-    int x = qrand() % size;
+    int x = qrand() % (size - 2) + 2;
     int y = qrand() % size;
 
     while(guards > 0) {
@@ -74,17 +78,25 @@ void GameModel::setGuards()
         if(gameTable[x][y] == Free) {
 
             gameTable[x][y] = Guard;
-            Coordinate grd(x,y, 0);
-            _guards.append(grd);
+
+            /*if(guards % 2 == 0) {
+                Coordinate grd(x,y, 0, Coordinate::Horizontal);
+                _guards.append(grd);
+            }
+            else {*/
+                Coordinate grd(x,y, 0);
+                _guards.append(grd);
+            //}
+
             steps.append(-1);
-            x = qrand() % size;
+            x = qrand() % (size - 2) + 2;
             y = qrand() % size;
             guards--;
         }
 
         else {
 
-            x = qrand() % size;
+            x = qrand() % (size - 2) + 2;
             y = qrand() % size;
         }
     }
@@ -113,6 +125,8 @@ void GameModel::setBaskets()
             y = qrand() % size;
         }
     }
+
+    tmp = _baskets.size();
 }
 
 void GameModel::setObstacles()
@@ -145,6 +159,8 @@ void GameModel::getBaskets()
         if(player == coord) {
 
             _baskets.removeAll(coord);
+            basketsHave = tmp - _baskets.size();
+
         }
     }
 }
@@ -154,6 +170,7 @@ bool GameModel::checkWin()
     if(_baskets.size() == 0) {
 
         gameWon();
+        guardstep->stop();
         return true;
     }
 
@@ -233,9 +250,10 @@ void GameModel::verticalGuard(int index)
         }
 
         steps[index] = steps[index] * -1;
-        _guards[index].type = Coordinate::Horizontal;
+        //_guards[index].type = Coordinate::Horizontal;
         return;
     }
+
 
     if(getField(_guards[index].x + steps[index], _guards[index].y) == Basket) {
 
@@ -287,7 +305,7 @@ void GameModel::horizontalGuard(int index)
         }
 
         steps[index] = steps[index] * -1;
-        _guards[index].type = Coordinate::Vertical;
+        //_guards[index].type = Coordinate::Vertical;
         return;
     }
 
@@ -329,15 +347,18 @@ void GameModel::stepGuard()
 {
     for(int i = 0; i < _guards.size(); ++i) {
 
-        if(_guards[i].type == Coordinate::Vertical) {
+        if(i % 2 == 0) {
 
             verticalGuard(i);
-        }
+        } else {
 
-        else {
             horizontalGuard(i);
         }
     }
+
+
+    _time = _time.addSecs(1);
+    updateTime();
 }
 
 GameModel::FieldType GameModel::getField(int x, int y)

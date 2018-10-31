@@ -4,6 +4,7 @@
 #include "newgamedialog.h"
 #include <QWidget>
 #include <QTimer>
+#include <QTime>
 
 class GameModel : public QObject
 {
@@ -23,6 +24,10 @@ public:
     int baskets;
     int guards;
     int obstacles;
+    int basketsHave;
+    QTimer *guardstep;
+    QTime labelTime;
+    QTime _time;
 
     void newGame();
     void stepPlayer(int x, int y);
@@ -34,6 +39,7 @@ signals:
     void gameWon();
     void gameOver();
     void fieldChanged(Coordinate previous, Coordinate current, GameModel::FieldType type);
+    void updateTime();
 
 public slots:
 
@@ -51,19 +57,18 @@ private:
     void horizontalGuard(int index);
     void isGameOver();
 
-    int fstep;  /// léptetéshez kell
-    int sstep;
-    int tstep;
-    int fostep;
     int step;
-    int basketsHave; /// ahányat felszedtünk
+    int tmp;
+     /// ahányat felszedtünk
 
     QVector <Coordinate> _baskets;
     QVector <Coordinate> _guards;
     QVector <int> steps;
     Coordinate stepTemp;
 
-    QTimer *guardstep;
+
+
+
 
 };
 
