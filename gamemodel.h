@@ -44,6 +44,7 @@ signals:
 public slots:
 
     void stepGuard();
+    void pauseOrPlay();
 
 private:
 

@@ -18,7 +18,6 @@ GameModel::GameModel()
 
 
     connect(guardstep, SIGNAL(timeout()), this, SLOT(stepGuard()));
-    //connect(gameTime, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void GameModel::newGame()
@@ -59,6 +58,18 @@ void GameModel::newGame()
     setElements();
 
     guardstep->start(1000);
+}
+
+void GameModel::pauseOrPlay()
+{
+    if(guardstep->isActive()) {
+        guardstep->stop();
+    }
+
+    else {
+
+        guardstep->start(1000);
+    }
 }
 
 void GameModel::setElements()
@@ -183,6 +194,11 @@ bool GameModel::checkWin()
 void GameModel::stepPlayer(int x, int y)
 {
 
+    if(!guardstep->isActive()) {
+
+        return;
+    }
+
     gameTable[player.x][player.y] = Free;
 
     player.x += x;
@@ -192,6 +208,8 @@ void GameModel::stepPlayer(int x, int y)
 
         player = previous;
     }
+
+
 
     isGameOver();
 

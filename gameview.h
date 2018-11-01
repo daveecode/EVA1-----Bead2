@@ -25,6 +25,7 @@ private:
     QPushButton *smallButton;
     QPushButton *mediumButton;
     QPushButton *bigButton;
+    QPushButton *pause;
     QLabel *bsk;
     QLabel *time;
     QGridLayout *grid;

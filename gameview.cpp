@@ -15,6 +15,7 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
     smallButton = new QPushButton("Kis pálya", this);
     mediumButton = new QPushButton("Közepes pálya", this);
     bigButton = new QPushButton("Nagy pálya", this);
+    pause = new QPushButton(trUtf8("Játék indítása/megállítása"), this);
     bsk = new QLabel(trUtf8("Megszerzett kosarak száma: "), this);
     bsk->setText(bsk->text() + QString::number(0));
     time = new QLabel(trUtf8("Eltelt játékidő: "), this);
@@ -25,6 +26,7 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
     upRow->addWidget(smallButton);
     upRow->addWidget(mediumButton);
     upRow->addWidget(bigButton);
+    upRow->addWidget(pause);
 
     newGame();
 
@@ -41,6 +43,7 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
     connect(&_model, SIGNAL(gameOver()), this, SLOT(_modelGameOver()));
     connect(&_model, SIGNAL(fieldChanged(Coordinate,Coordinate,GameModel::FieldType)), this, SLOT(_modelFieldChanged(Coordinate,Coordinate,GameModel::FieldType)));
     connect(&_model, SIGNAL(updateTime()), this, SLOT(_modelUpdateTime()));
+    connect(pause, SIGNAL(clicked(bool)), &_model, SLOT(pauseOrPlay()));
 }
 
 void GameView::small()
@@ -85,6 +88,7 @@ void GameView::newGame()
     buttons.clear();
     _model.newGame();
     bsk->setText("A megszerzett kosarak száma: " + QString::number(_model.basketsHave));
+    time->setText("Eltelt játékidő: " + _model._time.toString());
 
     for(int i = 0; i < _model.size; ++i) {
 
