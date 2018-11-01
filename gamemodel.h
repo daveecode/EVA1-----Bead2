@@ -57,6 +57,7 @@ private:
     void verticalGuard(int index);
     void horizontalGuard(int index);
     void isGameOver();
+    bool isOver;
 
     int step;
     int tmp;
@@ -66,6 +67,7 @@ private:
     QVector <Coordinate> _guards;
     QVector <int> steps;
     Coordinate stepTemp;
+    Coordinate _steptemp;
 
 
 

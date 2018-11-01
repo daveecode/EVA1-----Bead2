@@ -146,6 +146,7 @@ void GameView::_modelFieldChanged(Coordinate previous, Coordinate current, GameM
             button->setFree();
         }
 
+
         if(button->getCoord() == current) {
 
             switch(type) {
