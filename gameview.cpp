@@ -1,4 +1,5 @@
 #include "gameview.h"
+#include "enddialog.h"
 #include <QKeyEvent>
 #include <QWidget>
 #include <QPixmap>
@@ -6,7 +7,6 @@
 
 GameView::GameView(QWidget *parent) : QWidget(parent)
 {
-
     setWindowTitle("Maci Laci");
 
     grid = new QGridLayout;
@@ -16,6 +16,7 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
     mediumButton = new QPushButton("Közepes pálya", this);
     bigButton = new QPushButton("Nagy pálya", this);
     pause = new QPushButton(trUtf8("Játék indítása/megállítása"), this);
+    pause->setEnabled(false);
     bsk = new QLabel(trUtf8("Megszerzett kosarak száma: "), this);
     bsk->setText(bsk->text() + QString::number(0));
     time = new QLabel(trUtf8("Eltelt játékidő: "), this);
@@ -28,7 +29,7 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
     upRow->addWidget(bigButton);
     upRow->addWidget(pause);
 
-    newGame();
+    //newGame();
 
     //setLayout(grid);
 
@@ -36,7 +37,7 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
     main->addLayout(grid);
     setLayout(main);
 
-    connect(smallButton, SIGNAL(clicked(bool)), this, SLOT(small())); ///legfelsőőőőőő
+    connect(smallButton, SIGNAL(clicked(bool)), this, SLOT(small()));
     connect(mediumButton, SIGNAL(clicked(bool)), this, SLOT(medium()));
     connect(bigButton, SIGNAL(clicked(bool)), this, SLOT(big()));
     connect(&_model, SIGNAL(gameWon()), this, SLOT(_modelGameWon()));
@@ -49,9 +50,9 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
 void GameView::small()
 {
     _model.size = 8;
-    _model.guards = 1;
-    _model.obstacles = 6;
-    _model.baskets = 6;
+    _model.guards = 2;
+    _model.obstacles = 8;
+    _model.baskets = 8;
 
     newGame();
 }
@@ -60,8 +61,8 @@ void GameView::medium()
 {
     _model.size = 9;
     _model.guards = 2;
-    _model.obstacles = 8;
-    _model.baskets = 8;
+    _model.obstacles = 9;
+    _model.baskets = 9;
 
     newGame();
 }
@@ -69,7 +70,7 @@ void GameView::medium()
 void GameView::big()
 {
     _model.size = 10;
-    _model.guards = 3;
+    _model.guards = 2;
     _model.baskets = 10;
     _model.obstacles = 10;
 
@@ -132,6 +133,8 @@ void GameView::newGame()
             }
         }
     }
+
+    pause->setEnabled(true);
 }
 
 void GameView::_modelFieldChanged(Coordinate previous, Coordinate current, GameModel::FieldType type)
@@ -216,9 +219,9 @@ void GameView::keyPressEvent(QKeyEvent *event)
 
 void GameView::_modelGameOver()
 {
-    _modelFieldChanged(_model.previous, _model.player, GameModel::Bear);
     _model.guardstep->stop();
-    QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("Vesztettél!"));
+    _modelFieldChanged(_model.previous, _model.player, GameModel::Bear);
+    QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("Vesztettél! Meglátott a vadőr!"));
 }
 
 void GameView::_modelGameWon()
@@ -226,3 +229,4 @@ void GameView::_modelGameWon()
     _model.guardstep->stop();
     QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("Megnyerted a játékot!"));
 }
+

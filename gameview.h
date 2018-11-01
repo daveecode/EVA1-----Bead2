@@ -7,6 +7,7 @@
 
 #include "gamemodel.h"
 #include "gamebutton.h"
+#include "enddialog.h"
 
 class GameView : public QWidget
 {
@@ -33,6 +34,7 @@ private:
     QVBoxLayout *main;
     GameModel _model;
     QVector <GameButton*> buttons;
+    EndDialog *dial;
 
 private slots:
 
@@ -44,6 +46,7 @@ private slots:
     void small();
     void medium();
     void big();
+
 };
 
 #endif // GAMEVIEW_H

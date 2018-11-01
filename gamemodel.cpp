@@ -9,10 +9,7 @@ GameModel::GameModel()
         gameTable[i] = new FieldType[10];
     }
 
-    size = 10;
-    guards = 2;
-    baskets = 6;
-    obstacles = 8;
+
 
     guardstep = new QTimer;
 
@@ -86,18 +83,11 @@ void GameModel::setGuards()
 
     while(guards > 0) {
 
-        if(gameTable[x][y] == Free) {
+        if(gameTable[x][y] == Free && getField(x + 2, y + 2) != Guard) {
 
             gameTable[x][y] = Guard;
-
-            /*if(guards % 2 == 0) {
-                Coordinate grd(x,y, 0, Coordinate::Horizontal);
-                _guards.append(grd);
-            }
-            else {*/
-                Coordinate grd(x,y, 0);
-                _guards.append(grd);
-            //}
+            Coordinate grd(x,y, 0);
+            _guards.append(grd);
 
             steps.append(-1);
             x = qrand() % (size - 2) + 2;
@@ -120,7 +110,7 @@ void GameModel::setBaskets()
 
     while(baskets > 0) {
 
-        if(gameTable[x][y] == Free) {
+        if(gameTable[x][y] == Free && getField(x - 1,y) != Obstacle) {
 
             gameTable[x][y] = Basket;
             Coordinate bsk(x,y, 0);
@@ -374,6 +364,10 @@ void GameModel::stepGuard()
         }
     }
 
+    if(checkWin()) {
+
+        return;
+    }
 
     _time = _time.addSecs(1);
     updateTime();
