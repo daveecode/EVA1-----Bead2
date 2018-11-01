@@ -90,7 +90,7 @@ void GameModel::setGuards()
 
     while(guards > 0) {
 
-        if(gameTable[x][y] == Free) {
+        if(gameTable[x][y] == Free && getField(x + 2, y + 2) != Guard && getField(x - 2, y - 2) != Guard) {
 
             gameTable[x][y] = Guard;
             Coordinate grd(x,y, 0);
@@ -144,7 +144,8 @@ void GameModel::setObstacles()
 
     while(obstacles > 0) {
 
-        if(gameTable[x][y] == Free) {
+        if(gameTable[x][y] == Free && getField(x + 1, y) != Guard && getField(x - 1, y) != Guard
+                && getField(x, y + 1) != Guard && getField(x, y - 1) != Guard) {
 
             gameTable[x][y] = Obstacle;
             x = qrand() % (size-1) + 1;
@@ -364,6 +365,7 @@ void GameModel::horizontalGuard(int index)
 
             steps[index] = steps[index] * -1;
             _guards[index].y += steps[index];
+
             Coordinate _new(_guards[index].x, _guards[index].y + steps[index], 0);
             fieldChanged(_guards[index], _new, GameModel::Guard);
             if(stepTemp.y == _guards[index].y && _baskets.contains(stepTemp)) {
