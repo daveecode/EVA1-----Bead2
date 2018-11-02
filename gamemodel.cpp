@@ -222,34 +222,42 @@ void GameModel::isGameOver()
     for(int i = 0; i < _guards.size(); ++i) {
 
         if(_guards[i].x + 1 == player.x && _guards[i].y == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x + 1 == player.x && _guards[i].y + 1 == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x + 1 == player.x && _guards[i].y - 1 == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x - 1 == player.x && _guards[i].y == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x - 1 == player.x && _guards[i].y - 1 == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x - 1 == player.x && _guards[i].y + 1 == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x == player.x && _guards[i].y + 1 == player.y) {
+            isOver = true;
             gameOver();
         }
 
         if(_guards[i].x == player.x && _guards[i].y - 1 == player.y) {
+            isOver = true;
             gameOver();
         }
     }
@@ -282,14 +290,6 @@ void GameModel::verticalGuard(int index)
 
     _guards[index].x += steps[index];
 
-    foreach(Coordinate _tmp, _guards) {
-
-        if(_tmp.x == _guards[index].x - steps[index]) {
-
-            fieldChanged(_tmp, _tmp, GameModel::Guard);
-        }
-    }
-
     isGameOver();
 
     foreach(Coordinate tmp, _baskets) {
@@ -313,6 +313,14 @@ void GameModel::verticalGuard(int index)
             fieldChanged(stepTemp, stepTemp, GameModel::Basket);
         }
         _guards[index].x += steps[index];
+    }
+
+    foreach(Coordinate _tmp, _guards) {
+
+        if(_tmp.x == _guards[index].x - steps[index]) {
+
+            fieldChanged(_tmp, _tmp, GameModel::Guard);
+        }
     }
 
 }
@@ -344,15 +352,6 @@ void GameModel::horizontalGuard(int index)
 
     _guards[index].y += steps[index];
 
-
-    foreach(Coordinate _tmp, _guards) {
-
-        if(_tmp.y == _guards[index].y - steps[index]) {
-
-            fieldChanged(_tmp, _tmp, GameModel::Guard);
-        }
-    }
-
     foreach(Coordinate tmp, _baskets) {
 
         if(tmp.y == _guards[index].y - steps[index]) {
@@ -360,6 +359,8 @@ void GameModel::horizontalGuard(int index)
             fieldChanged(tmp, tmp, GameModel::Basket);
         }
     }
+
+
 
     if(_guards[index].y == -1 || _guards[index].y == size) {
 
@@ -374,6 +375,14 @@ void GameModel::horizontalGuard(int index)
             }
             _guards[index].y += steps[index];
 
+    }
+
+    foreach(Coordinate _tmp, _guards) {
+
+        if(_tmp.y == _guards[index].y - steps[index]) {
+
+            fieldChanged(_tmp, _tmp, GameModel::Guard);
+        }
     }
 }
 
