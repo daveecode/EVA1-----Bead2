@@ -1,7 +1,6 @@
 #ifndef GAMEMODEL_H
 #define GAMEMODEL_H
 #include "coordinate.h"
-#include "newgamedialog.h"
 #include <QWidget>
 #include <QTimer>
 #include <QTime>
@@ -29,7 +28,7 @@ public:
     QTime labelTime;
     QTime _time;
 
-    void newGame();
+    void newGame(int _size, int _bsk, int _grd, int _obs);
     void stepPlayer(int x, int y);
     void getBaskets();
     bool checkWin();

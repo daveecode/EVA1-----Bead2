@@ -17,8 +17,13 @@ GameModel::GameModel()
     connect(guardstep, SIGNAL(timeout()), this, SLOT(stepGuard()));
 }
 
-void GameModel::newGame()
+void GameModel::newGame(int _size, int _bsk, int _grd, int _obs)
 {
+
+    size = _size;
+    baskets = _bsk;
+    guards = _grd;
+    obstacles = _obs;
 
     gameTable = new FieldType*[size];
 

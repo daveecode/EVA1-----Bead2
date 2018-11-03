@@ -49,30 +49,21 @@ GameView::GameView(QWidget *parent) : QWidget(parent)
 
 void GameView::small()
 {
-    _model.size = 8;
-    _model.guards = 2;
-    _model.obstacles = 8;
-    _model.baskets = 8;
+    size = 8;
 
     newGame();
 }
 
 void GameView::medium()
 {
-    _model.size = 9;
-    _model.guards = 2;
-    _model.obstacles = 9;
-    _model.baskets = 9;
+    size = 9;
 
     newGame();
 }
 
 void GameView::big()
 {
-    _model.size = 10;
-    _model.guards = 2;
-    _model.baskets = 10;
-    _model.obstacles = 10;
+    size = 10;
 
     newGame();
 }
@@ -87,7 +78,27 @@ void GameView::newGame()
     }
 
     buttons.clear();
-    _model.newGame();
+
+    if(size == 8) {
+
+       _model.newGame(8,8,2,8);
+    }
+
+    else if(size == 9) {
+
+        _model.newGame(9, 9, 2, 9);
+    }
+
+    else if(size == 10) {
+
+        _model.newGame(10, 10, 2, 10);
+    }
+
+    else {
+
+        _model.newGame(8, 8, 2, 8);
+    }
+
     bsk->setText("A megszerzett kosarak száma: " + QString::number(_model.basketsHave));
     time->setText("Eltelt játékidő: " + _model._time.toString());
 

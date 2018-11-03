@@ -36,6 +36,8 @@ private:
     QVector <GameButton*> buttons;
     EndDialog *dial;
 
+    int size;
+
 private slots:
 
     void _modelFieldChanged(Coordinate previous, Coordinate current, GameModel::FieldType type);
