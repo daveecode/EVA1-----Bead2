@@ -1,4 +1,5 @@
 #include "gameview.h"
+#include "enddialog.h"
 #include <QKeyEvent>
 #include <QWidget>
 #include <QPixmap>
@@ -6,19 +7,74 @@
 
 GameView::GameView(QWidget *parent) : QWidget(parent)
 {
-
     setWindowTitle("Maci Laci");
-    setStyleSheet("background-image: url(:image/free.jpg)");
 
     grid = new QGridLayout;
+    upRow = new QHBoxLayout;
+    main = new QVBoxLayout;
+    smallButton = new QPushButton("Kis pálya", this);
+    mediumButton = new QPushButton("Közepes pálya", this);
+    bigButton = new QPushButton("Nagy pálya", this);
+    pause = new QPushButton(trUtf8("Játék indítása/megállítása"), this);
+    pause->setEnabled(false);
+    bsk = new QLabel(trUtf8("Megszerzett kosarak száma: "), this);
+    bsk->setText(bsk->text() + QString::number(0));
+    time = new QLabel(trUtf8("Eltelt játékidő: "), this);
+    time->setText(time->text() + _model._time.toString());
 
-    newGame();
+    upRow->addWidget(bsk);
+    upRow->addWidget(time);
+    upRow->addWidget(smallButton);
+    upRow->addWidget(mediumButton);
+    upRow->addWidget(bigButton);
+    upRow->addWidget(pause);
 
-    setLayout(grid);
+    //newGame();
 
+    //setLayout(grid);
+
+    main->addLayout(upRow);
+    main->addLayout(grid);
+    setLayout(main);
+
+    connect(smallButton, SIGNAL(clicked(bool)), this, SLOT(small()));
+    connect(mediumButton, SIGNAL(clicked(bool)), this, SLOT(medium()));
+    connect(bigButton, SIGNAL(clicked(bool)), this, SLOT(big()));
     connect(&_model, SIGNAL(gameWon()), this, SLOT(_modelGameWon()));
     connect(&_model, SIGNAL(gameOver()), this, SLOT(_modelGameOver()));
     connect(&_model, SIGNAL(fieldChanged(Coordinate,Coordinate,GameModel::FieldType)), this, SLOT(_modelFieldChanged(Coordinate,Coordinate,GameModel::FieldType)));
+    connect(&_model, SIGNAL(updateTime()), this, SLOT(_modelUpdateTime()));
+    connect(pause, SIGNAL(clicked(bool)), &_model, SLOT(pauseOrPlay()));
+}
+
+void GameView::small()
+{
+    _model.size = 8;
+    _model.guards = 2;
+    _model.obstacles = 8;
+    _model.baskets = 8;
+
+    newGame();
+}
+
+void GameView::medium()
+{
+    _model.size = 9;
+    _model.guards = 2;
+    _model.obstacles = 9;
+    _model.baskets = 9;
+
+    newGame();
+}
+
+void GameView::big()
+{
+    _model.size = 10;
+    _model.guards = 2;
+    _model.baskets = 10;
+    _model.obstacles = 10;
+
+    newGame();
 }
 
 void GameView::newGame()
@@ -32,10 +88,12 @@ void GameView::newGame()
 
     buttons.clear();
     _model.newGame();
+    bsk->setText("A megszerzett kosarak száma: " + QString::number(_model.basketsHave));
+    time->setText("Eltelt játékidő: " + _model._time.toString());
 
-    for(int i = 0; i < 10; ++i) {
+    for(int i = 0; i < _model.size; ++i) {
 
-        for(int j = 0; j < 10; ++j) {
+        for(int j = 0; j < _model.size; ++j) {
 
             GameButton *button = new GameButton(Coordinate(i,j,0), this);
             grid->addWidget(button, i, j);
@@ -75,6 +133,8 @@ void GameView::newGame()
             }
         }
     }
+
+    pause->setEnabled(true);
 }
 
 void GameView::_modelFieldChanged(Coordinate previous, Coordinate current, GameModel::FieldType type)
@@ -86,6 +146,7 @@ void GameView::_modelFieldChanged(Coordinate previous, Coordinate current, GameM
             button->setFree();
         }
 
+
         if(button->getCoord() == current) {
 
             switch(type) {
@@ -94,6 +155,7 @@ void GameView::_modelFieldChanged(Coordinate previous, Coordinate current, GameM
 
                 button->setBear();
                 _model.previous = _model.player;
+                bsk->setText("A megszerzett kosarak száma: " + QString::number(_model.basketsHave));
                 break;
 
             case GameModel::Guard:
@@ -121,6 +183,11 @@ void GameView::_modelFieldChanged(Coordinate previous, Coordinate current, GameM
     }
 
     _model.checkWin();
+}
+
+void GameView::_modelUpdateTime()
+{
+    time->setText("Eltelt játékidő: " + _model._time.toString());
 }
 
 void GameView::keyPressEvent(QKeyEvent *event)
@@ -153,12 +220,14 @@ void GameView::keyPressEvent(QKeyEvent *event)
 
 void GameView::_modelGameOver()
 {
+    _model.guardstep->stop();
     _modelFieldChanged(_model.previous, _model.player, GameModel::Bear);
-    QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("Vesztettél!"));
+    QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("Vesztettél! Meglátott a vadőr!"));
 }
 
 void GameView::_modelGameWon()
 {
-    QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("A játék döntetlen lett!"));
-    //QMessageBox::setStyleSheet("background: white");
+    _model.guardstep->stop();
+    QMessageBox::information(this, trUtf8("Játék vége!"), trUtf8("Megnyerted a játékot!"));
 }
+
