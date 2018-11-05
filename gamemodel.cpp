@@ -404,10 +404,10 @@ void GameModel::stepGuard()
         }
     }
 
-    if(checkWin()) {
+    /*if(checkWin()) {
 
         return;
-    }
+    }*/
 
     _time = _time.addSecs(1);
     updateTime();
